@@ -275,13 +275,10 @@ module Spreedly
 
     def add_bank_account_body(options)
       build_xml_request('payment_method') do |doc|
-        p "Doc 1: #{doc}"
         add_to_doc(doc, options, :retained)
         doc.bank_account do
-          p "Doc 2: #{doc}"
           add_to_doc(doc, options, :first_name, :last_name, :bank_account_number, :bank_routing_number, :bank_account_type, :bank_account_holder_type)
         end
-        p "Doc 3: #{doc}"
       end
     end
 
@@ -364,7 +361,7 @@ module Spreedly
 
     def api_post(url, body, talking_to_gateway = true)
       xml_doc = ssl_post(url, body, headers, talking_to_gateway)
-      'API Post'
+      puts 'API Post'
       puts xml_doc
       Transaction.new_from(xml_doc)
     end
