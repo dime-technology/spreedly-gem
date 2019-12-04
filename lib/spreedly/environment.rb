@@ -1,17 +1,19 @@
+# frozen_string_literal: true
+
 require 'base64'
 require 'nokogiri'
 
 module Spreedly
   class Environment
-
     include SslRequester
     include Urls
 
     attr_reader :key, :currency_code, :base_url
 
-    def initialize(environment_key, access_secret, options={})
-      @key, @access_secret = environment_key, access_secret
-      @base_url = options[:base_url] || "https://core.spreedly.com"
+    def initialize(environment_key, access_secret, options = {})
+      @key = environment_key
+      @access_secret = access_secret
+      @base_url = options[:base_url] || 'https://core.spreedly.com'
       @currency_code = options[:currency_code] || 'USD'
     end
 
@@ -87,12 +89,12 @@ module Spreedly
       RecacheSensitiveData.new_from(xml_doc)
     end
 
-    def redact_gateway(gateway_token, options = {})
+    def redact_gateway(gateway_token, _options = {})
       xml_doc = ssl_put(redact_gateway_url(gateway_token), '', headers)
       Transaction.new_from(xml_doc)
     end
 
-    def redact_receiver(receiver_token, options = {})
+    def redact_receiver(receiver_token, _options = {})
       xml_doc = ssl_put(redact_receiver_url(receiver_token), '', headers)
       Transaction.new_from(xml_doc)
     end
@@ -123,7 +125,7 @@ module Spreedly
     end
 
     def self.gateway_options
-      self.new("", "").gateway_options
+      new('', '').gateway_options
     end
 
     def receiver_options
@@ -132,7 +134,7 @@ module Spreedly
     end
 
     def self.receiver_options
-      self.new("", "").receiver_options
+      new('', '').receiver_options
     end
 
     def add_gateway(gateway_type, credentials = {})
@@ -145,6 +147,10 @@ module Spreedly
       body = add_receiver_body(receiver_type, host_names, credentials)
       xml_doc = ssl_post(add_receiver_url, body, headers)
       Receiver.new(xml_doc)
+    end
+
+    def add_bank_account(options)
+      api_post(add_payment_method_url, add_bank_account_body(options), false)
     end
 
     def add_credit_card(options)
@@ -163,6 +169,7 @@ module Spreedly
     end
 
     private
+
     def headers
       {
         'Authorization' => ('Basic ' + Base64.strict_encode64("#{@key}:#{@access_secret}").chomp),
@@ -218,6 +225,7 @@ module Spreedly
 
     def redact_payment_method_body(options)
       return '' if options.empty?
+
       build_xml_request('transaction') do |doc|
         add_to_doc(doc, options, :remove_from_gateway)
       end
@@ -242,7 +250,9 @@ module Spreedly
       build_xml_request('receiver') do |doc|
         doc.receiver_type receiver_type
         doc.hostnames(host_names) if host_names
-        add_credentials_to_doc(doc, credentials) if credentials && !credentials.empty?
+        if credentials && !credentials.empty?
+          add_credentials_to_doc(doc, credentials)
+        end
       end
     end
 
@@ -259,6 +269,15 @@ module Spreedly
           doc.credential do
             add_to_doc(doc, credential, :name, :value, :safe)
           end
+        end
+      end
+    end
+
+    def add_bank_account_body(options)
+      build_xml_request('payment_method') do |doc|
+        add_to_doc(doc, options, :data, :retained, :email)
+        doc.bank_account do
+          add_to_doc(doc, options, :first_name, :last_name, :bank_account_number, :bank_routing_number, :bank_account_type, :bank_account_holder_type)
         end
       end
     end
@@ -297,7 +316,7 @@ module Spreedly
 
     def add_to_doc(doc, options, *attributes)
       attributes.each do |attr|
-        doc.send(attr, options[attr.to_sym]) if options[attr.to_sym] != nil
+        doc.send(attr, options[attr.to_sym]) unless options[attr.to_sym].nil?
       end
     end
 
@@ -305,17 +324,19 @@ module Spreedly
       add_gateway_specific_fields(doc, options)
       add_shipping_address_override(doc, options)
       add_to_doc(doc, options, :order_id, :description, :ip, :email, :merchant_name_descriptor,
-                               :merchant_location_descriptor, :redirect_url, :callback_url,
-                               :continue_caching, :attempt_3dsecure, :browser_info, :three_ds_version, :channel)
+                 :merchant_location_descriptor, :redirect_url, :callback_url,
+                 :continue_caching, :attempt_3dsecure, :browser_info, :three_ds_version, :channel)
     end
 
     def add_gateway_specific_fields(doc, options)
-      return unless options[:gateway_specific_fields].kind_of?(Hash)
+      return unless options[:gateway_specific_fields].is_a?(Hash)
+
       doc << "<gateway_specific_fields>#{xml_for_hash(options[:gateway_specific_fields])}</gateway_specific_fields>"
     end
 
     def add_shipping_address_override(doc, options)
-      return unless options[:shipping_address].kind_of?(Hash)
+      return unless options[:shipping_address].is_a?(Hash)
+
       doc.send(:shipping_address) do
         options[:shipping_address].each do |k, v|
           doc.send(k, v)
@@ -325,7 +346,7 @@ module Spreedly
 
     def xml_for_hash(hash)
       hash.map do |key, value|
-        text = value.kind_of?(Hash) ? xml_for_hash(value) : value
+        text = value.is_a?(Hash) ? xml_for_hash(value) : value
         "<#{key}>#{text}</#{key}>"
       end.join
     end
