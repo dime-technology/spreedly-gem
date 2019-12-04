@@ -32,8 +32,6 @@ module Spreedly
         raw_ssl_request(method, endpoint, body, headers)
       end
 
-      debugger
-
       show_raw_response(raw_response)
       handle_response(raw_response, opts[:return_raw])
     rescue Timeout::Error => e
