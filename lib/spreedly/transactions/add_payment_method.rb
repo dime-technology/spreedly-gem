@@ -14,5 +14,3 @@ module Spreedly
     end
   end
 end
-
-payment_method_xml_doc ? 'Opa!' : 'none'
