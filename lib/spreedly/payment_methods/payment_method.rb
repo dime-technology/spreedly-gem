@@ -17,15 +17,15 @@ module Spreedly
     def self.new_from(xml_doc)
       case xml_doc.at_xpath('.//payment_method_type').inner_text
       when 'credit_card'
-        CreditCard.new(xml_doc)
+        Spreedly::CreditCard.new(xml_doc)
       when 'paypal'
-        Paypal.new(xml_doc)
+        Spreedly::Paypal.new(xml_doc)
       when 'sprel'
-        Sprel.new(xml_doc)
+        Spreedly::Sprel.new(xml_doc)
       when 'bank_account'
-        BankAccount.new(xml_doc)
+        Spreedly::BankAccount.new(xml_doc)
       when 'third_party_token'
-        ThirdPartyToken.new(xml_doc)
+        Spreedly::ThirdPartyToken.new(xml_doc)
       end
     end
 
