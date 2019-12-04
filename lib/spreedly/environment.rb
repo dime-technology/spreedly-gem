@@ -275,10 +275,13 @@ module Spreedly
 
     def add_bank_account_body(options)
       build_xml_request('payment_method') do |doc|
-        add_to_doc(doc, options, :data, :retained, :email)
+        p "Doc 1: #{doc}"
+        add_to_doc(doc, options, :retained)
         doc.bank_account do
+          p "Doc 2: #{doc}"
           add_to_doc(doc, options, :first_name, :last_name, :bank_account_number, :bank_routing_number, :bank_account_type, :bank_account_holder_type)
         end
+        p "Doc 3: #{doc}"
       end
     end
 
