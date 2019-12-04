@@ -23,7 +23,12 @@ module Spreedly
       when 'sprel'
         Sprel.new(xml_doc)
       when 'bank_account'
-        BankAccount.new(xml_doc)
+        p 'Bank Account'
+        p xml_doc
+        b = BankAccount.new(xml_doc)
+
+        p b
+        b
       when 'third_party_token'
         ThirdPartyToken.new(xml_doc)
       end
