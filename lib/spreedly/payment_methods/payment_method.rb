@@ -23,8 +23,7 @@ module Spreedly
       when 'sprel'
         Sprel.new(xml_doc)
       when 'bank_account'
-        debugger
-        return BankAccount.new(xml_doc)
+        Spreedly::BankAccount.new(xml_doc)
       when 'third_party_token'
         ThirdPartyToken.new(xml_doc)
       end
