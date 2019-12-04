@@ -364,6 +364,8 @@ module Spreedly
 
     def api_post(url, body, talking_to_gateway = true)
       xml_doc = ssl_post(url, body, headers, talking_to_gateway)
+      'API Post'
+      puts xml_doc
       Transaction.new_from(xml_doc)
     end
   end
